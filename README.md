@@ -1,157 +1,215 @@
 # Sistema de Gestión de Pedidos
 
-API REST para gestión y seguimiento de pedidos, desarrollada con Node.js, Express, TypeScript y PostgreSQL.
+## Descripción
+- Breve descripción del sistema
+- Tecnologías principales (Node.js, Express, TypeScript, PostgreSQL)
+- Propósito del sistema
 
 ## Requisitos
-
 - Node.js >= 14
 - PostgreSQL >= 12
 - npm
 
 ## Instalación
+1. Clonar repositorio
+2. Instalar dependencias (npm install)
+3. Configurar variables de entorno
 
-1. Clonar el repositorio
-2. Instalar dependencias:
-
-npm install
-
-3. Configurar variables de entorno (.env):
-
+## Variables de Entorno (.env)
 PORT=3000
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=gestor_pedidos
+DB_NAME=pedidos
 DB_USER=tu_usuario
 DB_PASSWORD=tu_password
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tu_email@gmail.com
+SMTP_PASS=tu_password_app
+ADMIN_EMAIL=tu_email@gmail.com
 ALERTA_DESPACHO_HORAS=72
 
-## Scripts
-
-# Desarrollo
-npm run dev
-
-# Compilar
-npm run build
-
-# Producción
-npm start
-
-# Tests
-npm test
+## Scripts Disponibles
+- npm run dev (desarrollo)
+- npm run build (compilar)
+- npm start (producción)
+- npm test (tests unitarios)
+- npm run test:integration (tests de integración)
+- npm run test:coverage (cobertura)
 
 ## Estructura del Proyecto
-
-proyecto-gestion-pedidos/
-├── src/
-│   ├── config/
-│   │   └── database.ts
-│   ├── controllers/
-│   │   └── pedidoController.ts
-│   ├── models/
-│   │   └── Pedido.ts
-│   ├── routes/
-│   │   └── pedidoRoutes.ts
-│   ├── services/
-│   │   ├── pedidoService.ts
-│   │   └── alertaService.ts
-│   ├── utils/
-│   │   └── validadores.ts
-│   └── app.ts
-├── .env
-├── .gitignore
-├── package.json
-├── tsconfig.json
-└── README.md
+[Árbol de directorios detallado]
 
 ## API Endpoints
 
 ### Pedidos
+- POST /api/pedidos (crear)
+- PUT /api/pedidos/:id/estado (actualizar estado)
+- GET /api/pedidos/:id (obtener)
+- GET /api/pedidos (listar con filtros)
+- PATCH /api/pedidos/:id/dias-alerta (configurar días)
 
-#### Crear Pedido
+### Configuración
+- GET /api/configuracion/dias-alerta (obtener default)
+- PUT /api/configuracion/dias-alerta (actualizar default)
 
+## Estados del Pedido
+- CREADO
+- PREPARACION
+- DESPACHO
+- ENTREGA
+- SIN_RUTA
+- RETENIDO
+- ALERTA_DEMORA
+
+## Características Principales
+- CRUD de pedidos
+- Control de versiones
+- Sistema de alertas
+- Notificaciones email
+- Registro de eventos
+- Validación de estados
+- Configuración personalizable
+- Tests completos
+
+## Estructura de Base de Datos
+[Esquemas de tablas principales]
+- pedidos
+- eventos_pedido
+- configuracion
+- notificaciones
+
+
+## Ejemplos de Uso
+
+### Crear Pedido
 POST /api/pedidos
 Content-Type: application/json
 
 {
-  "numero_pedido": "PED001",
-  "destinatario": "Juan Pérez",
-  "ruta": "RUTA-001"
+    "numero_pedido": "PED-001",
+    "destinatario": "Juan Pérez",
+    "ruta": "ZONA-NORTE",
+    "dias_alerta": 5
 }
 
-#### Actualizar Estado
+Respuesta (201):
+{
+    "id": 1,
+    "numero_pedido": "PED-001",
+    "estado": "CREADO",
+    "fecha_creacion": "2024-02-04T15:08:35.947Z",
+    "fecha_actualizacion": "2024-02-04T15:08:35.947Z",
+    "ruta": "ZONA-NORTE",
+    "destinatario": "Juan Pérez",
+    "dias_alerta": 5,
+    "version": 1
+}
 
-PUT /api/pedidos/:id/estado
+### Actualizar Estado
+PUT /api/pedidos/1/estado
+Content-Type: application/json
 
 {
-  "estado": "DESPACHO",
-  "descripcion": "En camino a entrega"
+    "estado": "PREPARACION",
+    "version": 1,
+    "descripcion": "Iniciando preparación"
 }
 
-#### Obtener Pedido
-
-GET /api/pedidos/:id
-
-#### Listar Pedidos
-
-GET /api/pedidos
-
-Parámetros opcionales:
-- estado
-- fechaInicio
-- fechaFin
-- numeroPedido
-- pagina (default: 1)
-- limite (default: 10)
-
-#### Configurar Días de Alerta
-
-PATCH /api/pedidos/:id/dias-alerta
-
+Respuesta (200):
 {
-  "dias_alerta": 5
+    "id": 1,
+    "numero_pedido": "PED-001",
+    "estado": "PREPARACION",
+    "fecha_actualizacion": "2024-02-04T15:10:35.947Z",
+    "version": 2
 }
 
-## Estados de Pedido
+### Listar Pedidos
+GET /api/pedidos?estado=PREPARACION&pagina=1&limite=10
 
-- CREADO: Registrado en sistema
-- PREPARACION: En preparación
-- DESPACHO: En ruta de entrega
-- ENTREGA: Entregado
-- SIN_RUTA: Pendiente de ruta
-- RETENIDO: Retenido
-- ALERTA_DEMORA: En alerta por demora
+Respuesta (200):
+{
+    "pedidos": [
+        {
+            "id": 1,
+            "numero_pedido": "PED-001",
+            "estado": "PREPARACION",
+            "fecha_creacion": "2024-02-04T15:08:35.947Z",
+            "fecha_actualizacion": "2024-02-04T15:10:35.947Z",
+            "ruta": "ZONA-NORTE",
+            "destinatario": "Juan Pérez",
+            "dias_alerta": 5,
+            "version": 2
+        }
+    ],
+    "total": 1,
+    "pagina": 1,
+    "limite": 10,
+    "totalPaginas": 1
+}
 
-## Características
+## Tests
 
-- ✅ CRUD completo de pedidos
-- ✅ Filtrado y paginación
-- ✅ Sistema de alertas por demora
-- ✅ Registro de eventos
-- ✅ Validación de datos
-- ✅ Manejo de transacciones
-- ✅ Trazabilidad de estados
+### Tests Unitarios
+Verifican componentes individuales:
+- Validación de estados
+- Lógica de servicios
+- Controladores
+- Utilidades
 
-## Base de Datos
+Ejecutar: npm test
 
-### Tabla: pedidos
+### Tests de Integración
+Prueban flujos completos:
+- Creación y actualización de pedidos
+- Sistema de alertas
+- Notificaciones
+- Configuración
 
-CREATE TABLE pedidos (
-  id SERIAL PRIMARY KEY,
-  numero_pedido VARCHAR(50) UNIQUE NOT NULL,
-  estado VARCHAR(20) NOT NULL,
-  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  ruta VARCHAR(100),
-  destinatario VARCHAR(200),
-  dias_alerta INTEGER DEFAULT 3
-);
+Ejecutar: npm run test:integration
 
-### Tabla: eventos_pedido
+### Tests de Cobertura
+Generan reportes detallados:
+Ejecutar: npm run test:coverage
 
-CREATE TABLE eventos_pedido (
-  id SERIAL PRIMARY KEY,
-  pedido_id INTEGER REFERENCES pedidos(id),
-  estado VARCHAR(20) NOT NULL,
-  fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  descripcion TEXT
-);
+## Manejo de Errores
+
+### Códigos HTTP
+- 200: OK
+- 201: Creado
+- 400: Error de validación
+- 404: No encontrado
+- 409: Conflicto de versión
+- 500: Error interno
+
+### Ejemplos de Errores
+
+#### Error de Validación
+{
+    "error": "El número de pedido es requerido"
+}
+
+#### Estado Inválido
+{
+    "error": "Estado inválido",
+    "estadosValidos": [
+        "CREADO",
+        "PREPARACION",
+        "DESPACHO",
+        "ENTREGA",
+        "SIN_RUTA",
+        "RETENIDO",
+        "ALERTA_DEMORA"
+    ]
+}
+
+#### Conflicto de Versión
+{
+    "error": "Conflicto de versión: el pedido ha sido modificado"
+}
+
+#### Transición Inválida
+{
+    "error": "Transición no válida: CREADO -> ENTREGA"
+} 
